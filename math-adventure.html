@@ -77,8 +77,8 @@
   /* ---- MONSTER ---- */
   .monster-wrap {
     position: relative;
-    width: 140px;
-    height: 160px;
+    width: 160px;
+    height: 180px;
     margin: 0 auto;
   }
 
@@ -95,7 +95,17 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    transition: transform 0.3s ease;
+    transition: background 0.6s ease, width 0.6s ease, height 0.6s ease, filter 0.4s;
+  }
+
+  /* Idle breathing animation */
+  .monster.idle {
+    animation: monsterBreathe 2.5s ease-in-out infinite;
+  }
+
+  @keyframes monsterBreathe {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.04) translateY(-2px); }
   }
 
   .monster-eyes {
@@ -111,6 +121,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    overflow: hidden;
   }
   .pupil {
     width: 12px;
@@ -118,6 +130,23 @@
     background: #1e1b4b;
     border-radius: 50%;
     transition: transform 0.2s;
+  }
+
+  /* Blink animation */
+  .eye::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--monster);
+    transform: translateY(-100%);
+    transition: background 0.6s ease;
+  }
+  .monster.blink .eye::after {
+    animation: blinkAnim 0.18s ease-in-out;
+  }
+  @keyframes blinkAnim {
+    0%, 100% { transform: translateY(-100%); }
+    40%, 60% { transform: translateY(0); }
   }
 
   .monster-mouth {
@@ -140,6 +169,53 @@
     height: 8px;
     background: #fb7185;
     border-radius: 50% 50% 0 0;
+  }
+
+  /* Monster accessories (evolution) */
+  .monster-accessory {
+    position: absolute;
+    transition: opacity 0.4s, transform 0.4s;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .accessory-horns {
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    opacity: 0;
+  }
+  .accessory-horns.visible { opacity: 1; }
+  .accessory-cheeks {
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 60px;
+    opacity: 0;
+  }
+  .cheek {
+    width: 14px;
+    height: 10px;
+    background: #f9a8d4;
+    border-radius: 50%;
+  }
+  .accessory-cheeks.visible { opacity: 0.7; }
+  .accessory-sparkle {
+    top: -8px;
+    right: -4px;
+    font-size: 18px;
+    opacity: 0;
+    animation: none;
+  }
+  .accessory-sparkle.visible {
+    opacity: 1;
+    animation: sparkleRotate 2s linear infinite;
+  }
+  @keyframes sparkleRotate {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.2); }
+    100% { transform: rotate(360deg) scale(1); }
   }
 
   /* Monster states */
@@ -180,18 +256,57 @@
   }
 
   /* Crown / streak hat */
-  .crown {
+  .streak-accessory {
     position: absolute;
-    top: 0;
+    top: -6px;
     left: 50%;
     transform: translateX(-50%) scale(0);
-    font-size: 36px;
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 2;
+    font-size: 32px;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+    z-index: 4;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    opacity: 0;
   }
-  .crown.visible {
+  .streak-accessory.visible {
     transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+
+  /* ---- LEVEL / PROGRESS BAR ---- */
+  .level-bar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 4px;
+    margin-bottom: 4px;
+  }
+  .level-label {
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.85rem;
+    color: #7c3aed;
+    white-space: nowrap;
+  }
+  .progress-track {
+    flex: 1;
+    height: 12px;
+    background: rgba(0,0,0,0.1);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #8b5cf6, #ec4899);
+    border-radius: 6px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-count {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #6d28d9;
+    min-width: 32px;
+    text-align: right;
   }
 
   /* ---- PROBLEM SCREEN ---- */
@@ -232,6 +347,7 @@
     cursor: pointer;
     box-shadow: 0 4px 0 rgba(0,0,0,0.2), 0 6px 14px rgba(0,0,0,0.1);
     transition: transform 0.1s, box-shadow 0.1s, opacity 0.3s, filter 0.3s;
+    position: relative;
   }
   .answer-btn:active {
     transform: translateY(3px);
@@ -274,6 +390,18 @@
   .feedback.correct-msg { color: #16a34a; }
   .feedback.wrong-msg { color: #dc2626; }
 
+  /* ---- FLYING FOOD ---- */
+  .flying-food {
+    position: fixed;
+    font-size: 36px;
+    z-index: 200;
+    pointer-events: none;
+    transition: none;
+  }
+  .flying-food.animate {
+    transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.3, 1), opacity 0.5s ease;
+  }
+
   /* ---- STARS / CONFETTI ---- */
   .stars-container {
     position: fixed;
@@ -313,6 +441,17 @@
     color: #7c3aed;
   }
 
+  .level-up-msg {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    color: #ec4899;
+    animation: levelPulse 0.6s ease infinite alternate;
+  }
+  @keyframes levelPulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.08); }
+  }
+
   .confetti-container {
     position: fixed;
     inset: 0;
@@ -349,8 +488,8 @@
   <!-- START SCREEN -->
   <div id="start-screen" class="screen active">
     <div class="monster-wrap">
-      <div class="crown" id="start-crown">👑</div>
-      <div class="monster" id="start-monster">
+      <div class="streak-accessory" id="start-streak">👑</div>
+      <div class="monster idle" id="start-monster">
         <div class="monster-eyes">
           <div class="eye"><div class="pupil"></div></div>
           <div class="eye"><div class="pupil"></div></div>
@@ -369,9 +508,19 @@
       <span id="score-display">Score: 0</span>
       <span id="streak-display">Streak: 0</span>
     </div>
-    <div class="monster-wrap">
-      <div class="crown" id="game-crown">👑</div>
-      <div class="monster" id="game-monster">
+    <div class="level-bar">
+      <span class="level-label" id="level-label">Lv 1</span>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <span class="progress-count" id="progress-count">0/10</span>
+    </div>
+    <div class="monster-wrap" id="game-monster-wrap">
+      <div class="streak-accessory" id="game-streak">👑</div>
+      <div class="monster idle" id="game-monster">
+        <div class="monster-accessory accessory-horns" id="acc-horns">👿</div>
+        <div class="monster-accessory accessory-cheeks" id="acc-cheeks">
+          <div class="cheek"></div><div class="cheek"></div>
+        </div>
+        <div class="monster-accessory accessory-sparkle" id="acc-sparkle">✨</div>
         <div class="monster-eyes">
           <div class="eye"><div class="pupil"></div></div>
           <div class="eye"><div class="pupil"></div></div>
@@ -392,7 +541,7 @@
   <!-- CELEBRATION SCREEN -->
   <div id="celebration-screen" class="screen celebration-screen">
     <div class="monster-wrap">
-      <div class="crown visible">👑</div>
+      <div class="streak-accessory visible">👑</div>
       <div class="monster happy" id="celeb-monster">
         <div class="monster-eyes">
           <div class="eye"><div class="pupil"></div></div>
@@ -401,10 +550,11 @@
         <div class="monster-mouth"></div>
       </div>
     </div>
-    <div class="title">Great Job!</div>
+    <div class="title" id="celeb-title">Great Job!</div>
     <div class="big-score" id="celeb-score">0</div>
     <div class="stat-line" id="celeb-streak">Best streak: 0</div>
     <div class="stat-line" id="celeb-total">Problems: 0 / 10</div>
+    <div class="level-up-msg" id="celeb-level" style="display:none"></div>
     <button class="play-btn" id="continue-btn">KEEP GOING!</button>
   </div>
 
@@ -420,8 +570,41 @@ let streak = 0;
 let bestStreak = 0;
 let totalProblems = 0;
 let currentAnswer = 0;
+let currentProblem = null;
 let accepting = false;
 let audioCtx = null;
+let monsterLevel = 1;
+let levelScore = 0; // score within current level (resets each 10)
+let retryQueue = []; // missed problems to retry
+let problemsSinceRetry = 0; // counter to space out retries
+let blinkInterval = null;
+
+// ===== MONSTER EVOLUTION CONFIG =====
+const LEVEL_THRESHOLD = 10; // correct answers per level
+const monsterEvolutions = [
+  // level 1
+  { color: '#a78bfa', size: 120, name: 'Baby Blob',   horns: false, cheeks: false, sparkle: false },
+  // level 2
+  { color: '#60a5fa', size: 128, name: 'Cool Blob',   horns: false, cheeks: true,  sparkle: false },
+  // level 3
+  { color: '#34d399', size: 134, name: 'Strong Blob',  horns: true,  cheeks: true,  sparkle: false },
+  // level 4
+  { color: '#f472b6', size: 140, name: 'Super Blob',   horns: true,  cheeks: true,  sparkle: true  },
+  // level 5
+  { color: '#fbbf24', size: 146, name: 'Mega Blob',    horns: true,  cheeks: true,  sparkle: true  },
+  // level 6+
+  { color: '#f87171', size: 150, name: 'Ultra Blob',   horns: true,  cheeks: true,  sparkle: true  },
+];
+
+// Streak accessories: [threshold, emoji]
+const streakAccessories = [
+  [3,  '👑'],
+  [5,  '😎'],
+  [7,  '🎩'],
+  [10, '🌈'],
+];
+
+const foods = ['🍪', '🍎', '🍕', '🧁', '🍩', '🍬', '🌮', '🍌', '🍇', '🥕'];
 
 // ===== ELEMENTS =====
 const $ = id => document.getElementById(id);
@@ -433,10 +616,14 @@ const feedback = $('feedback');
 const scoreDisplay = $('score-display');
 const streakDisplay = $('streak-display');
 const answerBtns = document.querySelectorAll('.answer-btn');
-const gameCrown = $('game-crown');
+const gameStreak = $('game-streak');
 const gameMonster = $('game-monster');
+const gameMonsterWrap = $('game-monster-wrap');
 const starsContainer = $('stars-container');
 const confettiContainer = $('confetti-container');
+const progressFill = $('progress-fill');
+const progressCount = $('progress-count');
+const levelLabel = $('level-label');
 
 // ===== SCREENS =====
 function showScreen(screen) {
@@ -453,19 +640,97 @@ function ensureAudio() {
 function playDingDing() {
   ensureAudio();
   const now = audioCtx.currentTime;
-  // First ding
   playTone(800, now, 0.12, 'sine', 0.3);
-  // Second ding (higher)
   playTone(1000, now + 0.15, 0.12, 'sine', 0.3);
 }
 
 function playWompWomp() {
   ensureAudio();
   const now = audioCtx.currentTime;
-  // First womp (descending)
   playBend(300, 250, now, 0.25, 'triangle', 0.3);
-  // Second womp (lower, descending)
   playBend(250, 180, now + 0.3, 0.35, 'triangle', 0.25);
+}
+
+function playBurp() {
+  ensureAudio();
+  const now = audioCtx.currentTime;
+  const dur = 0.7;
+
+  // Main throat rumble — low sawtooth with fast vibrato for gargling
+  const throat = audioCtx.createOscillator();
+  const throatGain = audioCtx.createGain();
+  const vibrato = audioCtx.createOscillator();
+  const vibratoGain = audioCtx.createGain();
+
+  // Vibrato modulates throat pitch for the wobbly gurgle
+  vibrato.type = 'sine';
+  vibrato.frequency.setValueAtTime(25, now);
+  vibrato.frequency.linearRampToValueAtTime(40, now + 0.15);
+  vibrato.frequency.linearRampToValueAtTime(15, now + dur);
+  vibratoGain.gain.setValueAtTime(30, now);
+  vibratoGain.gain.linearRampToValueAtTime(50, now + 0.1);
+  vibratoGain.gain.linearRampToValueAtTime(15, now + dur);
+  vibrato.connect(vibratoGain);
+  vibratoGain.connect(throat.frequency);
+
+  throat.type = 'sawtooth';
+  throat.frequency.setValueAtTime(70, now);
+  throat.frequency.linearRampToValueAtTime(110, now + 0.08);
+  throat.frequency.linearRampToValueAtTime(85, now + 0.2);
+  throat.frequency.linearRampToValueAtTime(95, now + 0.35);
+  throat.frequency.linearRampToValueAtTime(55, now + dur);
+  throatGain.gain.setValueAtTime(0.01, now);
+  throatGain.gain.linearRampToValueAtTime(0.22, now + 0.06);
+  throatGain.gain.setValueAtTime(0.22, now + 0.15);
+  throatGain.gain.linearRampToValueAtTime(0.18, now + 0.4);
+  throatGain.gain.exponentialRampToValueAtTime(0.01, now + dur);
+  throat.connect(throatGain);
+  throatGain.connect(audioCtx.destination);
+  vibrato.start(now);
+  throat.start(now);
+  vibrato.stop(now + dur);
+  throat.stop(now + dur);
+
+  // Bubbly pops — short sine blips at random-ish intervals
+  const bubbleTimes = [0.05, 0.12, 0.19, 0.28, 0.36, 0.42, 0.52];
+  bubbleTimes.forEach(t => {
+    const pop = audioCtx.createOscillator();
+    const popGain = audioCtx.createGain();
+    const freq = 150 + Math.random() * 200;
+    pop.type = 'sine';
+    pop.frequency.setValueAtTime(freq, now + t);
+    pop.frequency.exponentialRampToValueAtTime(freq * 0.5, now + t + 0.04);
+    popGain.gain.setValueAtTime(0.08 + Math.random() * 0.06, now + t);
+    popGain.gain.exponentialRampToValueAtTime(0.001, now + t + 0.05);
+    pop.connect(popGain);
+    popGain.connect(audioCtx.destination);
+    pop.start(now + t);
+    pop.stop(now + t + 0.06);
+  });
+
+  // Filtered noise layer for breathy texture
+  const bufferSize = audioCtx.sampleRate * dur;
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const data = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = noiseBuffer;
+  const noiseFilter = audioCtx.createBiquadFilter();
+  noiseFilter.type = 'bandpass';
+  noiseFilter.frequency.setValueAtTime(200, now);
+  noiseFilter.frequency.linearRampToValueAtTime(350, now + 0.15);
+  noiseFilter.frequency.linearRampToValueAtTime(150, now + dur);
+  noiseFilter.Q.value = 3;
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.setValueAtTime(0.01, now);
+  noiseGain.gain.linearRampToValueAtTime(0.09, now + 0.08);
+  noiseGain.gain.linearRampToValueAtTime(0.06, now + 0.3);
+  noiseGain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+  noise.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+  noiseGain.connect(audioCtx.destination);
+  noise.start(now);
+  noise.stop(now + dur);
 }
 
 function playTone(freq, startTime, duration, type, volume) {
@@ -520,7 +785,6 @@ function generateProblem() {
       break;
     case 'nearDouble': {
       const base = randInt(1, 9);
-      // Randomly present as base+(base+1) or (base+1)+base
       if (Math.random() < 0.5) {
         a = base; b = base + 1;
       } else {
@@ -547,11 +811,19 @@ function generateProblem() {
   return { answer, text };
 }
 
+function getNextProblem() {
+  // Check if we should serve a retry problem
+  problemsSinceRetry++;
+  if (retryQueue.length > 0 && problemsSinceRetry >= 3) {
+    problemsSinceRetry = 0;
+    return retryQueue.shift();
+  }
+  return generateProblem();
+}
+
 function generateChoices(correct) {
   const choices = new Set([correct]);
-  // Generate plausible wrong answers near the correct one
   const offsets = [-2, -1, 1, 2, 3, -3];
-  // Shuffle offsets
   for (let i = offsets.length - 1; i > 0; i--) {
     const j = randInt(0, i);
     [offsets[i], offsets[j]] = [offsets[j], offsets[i]];
@@ -561,20 +833,128 @@ function generateChoices(correct) {
     const val = correct + off;
     if (val >= 0 && val !== correct) choices.add(val);
   }
-  // If still not enough (unlikely), add more
   let extra = 1;
   while (choices.size < 4) {
     const val = correct + extra;
     if (!choices.has(val) && val >= 0) choices.add(val);
     extra++;
   }
-  // Shuffle
   const arr = Array.from(choices);
   for (let i = arr.length - 1; i > 0; i--) {
     const j = randInt(0, i);
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
+}
+
+// ===== MONSTER EVOLUTION =====
+function getEvolution(level) {
+  const idx = Math.min(level - 1, monsterEvolutions.length - 1);
+  return monsterEvolutions[idx];
+}
+
+function applyMonsterEvolution(monsterEl, level, animate) {
+  const evo = getEvolution(level);
+  monsterEl.style.background = evo.color;
+  monsterEl.style.width = evo.size + 'px';
+  monsterEl.style.height = evo.size + 'px';
+
+  // Update CSS variable for blink overlay color
+  monsterEl.style.setProperty('--monster', evo.color);
+
+  // Accessories on game monster
+  const horns = $('acc-horns');
+  const cheeks = $('acc-cheeks');
+  const sparkle = $('acc-sparkle');
+  if (horns) horns.classList.toggle('visible', evo.horns);
+  if (cheeks) cheeks.classList.toggle('visible', evo.cheeks);
+  if (sparkle) sparkle.classList.toggle('visible', evo.sparkle);
+
+  if (animate) {
+    monsterEl.style.filter = 'brightness(1.5)';
+    setTimeout(() => { monsterEl.style.filter = ''; }, 600);
+  }
+}
+
+function updateProgressBar() {
+  const pct = (levelScore / LEVEL_THRESHOLD) * 100;
+  progressFill.style.width = pct + '%';
+  progressCount.textContent = `${levelScore}/${LEVEL_THRESHOLD}`;
+  levelLabel.textContent = `Lv ${monsterLevel}`;
+}
+
+// ===== IDLE ANIMATIONS =====
+function startIdleAnimations() {
+  stopIdleAnimations();
+  gameMonster.classList.add('idle');
+  // Random blinking
+  scheduleBlink();
+}
+
+function stopIdleAnimations() {
+  gameMonster.classList.remove('idle');
+  if (blinkInterval) {
+    clearTimeout(blinkInterval);
+    blinkInterval = null;
+  }
+}
+
+function scheduleBlink() {
+  blinkInterval = setTimeout(() => {
+    gameMonster.classList.add('blink');
+    setTimeout(() => {
+      gameMonster.classList.remove('blink');
+      if (gameMonster.classList.contains('idle')) {
+        scheduleBlink();
+      }
+    }, 200);
+  }, 1500 + Math.random() * 3000);
+}
+
+// ===== STREAK ACCESSORIES =====
+function updateStreakAccessory() {
+  let emoji = '';
+  for (const [threshold, e] of streakAccessories) {
+    if (streak >= threshold) emoji = e;
+  }
+  if (emoji) {
+    gameStreak.textContent = emoji;
+    gameStreak.classList.add('visible');
+  } else {
+    gameStreak.classList.remove('visible');
+  }
+}
+
+// ===== FOOD ANIMATION =====
+function flyFood(btnEl) {
+  const food = document.createElement('div');
+  food.className = 'flying-food';
+  food.textContent = foods[randInt(0, foods.length - 1)];
+  document.body.appendChild(food);
+
+  // Position at center of button
+  const btnRect = btnEl.getBoundingClientRect();
+  const startX = btnRect.left + btnRect.width / 2 - 18;
+  const startY = btnRect.top + btnRect.height / 2 - 18;
+  food.style.left = startX + 'px';
+  food.style.top = startY + 'px';
+  food.style.transform = 'scale(1)';
+  food.style.opacity = '1';
+
+  // Target: monster mouth
+  const monsterRect = gameMonsterWrap.getBoundingClientRect();
+  const endX = monsterRect.left + monsterRect.width / 2 - 18;
+  const endY = monsterRect.top + monsterRect.height / 2;
+  const dx = endX - startX;
+  const dy = endY - startY;
+
+  requestAnimationFrame(() => {
+    food.classList.add('animate');
+    food.style.transform = `translate(${dx}px, ${dy}px) scale(0.3)`;
+    food.style.opacity = '0.2';
+  });
+
+  setTimeout(() => food.remove(), 600);
 }
 
 // ===== EFFECTS =====
@@ -623,21 +1003,19 @@ function cycleBg() {
 // ===== GAME LOGIC =====
 const happyMessages = ['YUM!', 'DELICIOUS!', 'MORE MORE MORE!', 'SO TASTY!', 'NOM NOM!', 'YUMMY!', 'AWESOME!', 'WOW!'];
 const sadMessages = ['Oops!', 'Not quite!', 'So close!', 'Almost!'];
+const burpMessages = ['BUUURP!', '*BURP*', 'Excuse me!', 'BRAAAP!'];
 
 function updateUI() {
   scoreDisplay.textContent = `Score: ${score}`;
   streakDisplay.textContent = `Streak: ${streak}`;
-  // Crown appears at streak >= 3
-  if (streak >= 3) {
-    gameCrown.classList.add('visible');
-  } else {
-    gameCrown.classList.remove('visible');
-  }
+  updateStreakAccessory();
+  updateProgressBar();
 }
 
 function nextProblem() {
   cycleBg();
-  const problem = generateProblem();
+  const problem = getNextProblem();
+  currentProblem = problem;
   currentAnswer = problem.answer;
   problemText.textContent = problem.text;
   feedback.innerHTML = '&nbsp;';
@@ -651,29 +1029,66 @@ function nextProblem() {
     btn.disabled = false;
   });
 
+  stopIdleAnimations();
   gameMonster.className = 'monster';
+  // Small delay then start idle
+  setTimeout(() => {
+    if (accepting) {
+      gameMonster.classList.add('idle');
+      startIdleAnimations();
+    }
+  }, 100);
   accepting = true;
 }
 
 function handleAnswer(btn) {
   if (!accepting) return;
   accepting = false;
+  stopIdleAnimations();
 
   const chosen = parseInt(btn.dataset.value);
+  const prevLevel = monsterLevel;
 
   if (chosen === currentAnswer) {
     // CORRECT
     score++;
     streak++;
+    levelScore++;
     if (streak > bestStreak) bestStreak = streak;
     totalProblems++;
-    updateUI();
 
+    // Level up check
+    let didLevelUp = false;
+    if (levelScore >= LEVEL_THRESHOLD) {
+      monsterLevel++;
+      levelScore = 0;
+      didLevelUp = true;
+    }
+
+    updateUI();
+    applyMonsterEvolution(gameMonster, monsterLevel, didLevelUp);
+
+    // Food animation
+    flyFood(btn);
+
+    // Burp on streak milestones (5, 10, 15, ...)
+    const isBurpStreak = streak > 0 && streak % 5 === 0;
+
+    // Sound: ding, then maybe burp
     playDingDing();
+    if (isBurpStreak) {
+      setTimeout(() => playBurp(), 350);
+    }
+
     gameMonster.className = 'monster happy';
     spawnStars();
 
-    const msg = happyMessages[randInt(0, happyMessages.length - 1)];
+    let msg;
+    if (isBurpStreak) {
+      msg = burpMessages[randInt(0, burpMessages.length - 1)];
+    } else {
+      msg = happyMessages[randInt(0, happyMessages.length - 1)];
+    }
     feedback.textContent = msg;
     feedback.className = 'feedback correct-msg';
 
@@ -681,24 +1096,29 @@ function handleAnswer(btn) {
 
     setTimeout(() => {
       if (totalProblems > 0 && totalProblems % 10 === 0) {
-        showCelebration();
+        showCelebration(didLevelUp, prevLevel);
       } else {
         nextProblem();
       }
     }, 1200);
 
   } else {
-    // WRONG
+    // WRONG — add to retry queue
     streak = 0;
     totalProblems++;
     updateUI();
+
+    // Queue this problem for retry (avoid duplicates)
+    const isDuplicate = retryQueue.some(p => p.text === currentProblem.text);
+    if (!isDuplicate) {
+      retryQueue.push({ ...currentProblem });
+    }
 
     playWompWomp();
     gameMonster.className = 'monster sad';
 
     btn.classList.add('wrong-pick');
 
-    // Highlight correct answer
     answerBtns.forEach(b => {
       if (parseInt(b.dataset.value) === currentAnswer) {
         b.classList.add('correct-reveal');
@@ -713,7 +1133,7 @@ function handleAnswer(btn) {
 
     setTimeout(() => {
       if (totalProblems > 0 && totalProblems % 10 === 0) {
-        showCelebration();
+        showCelebration(false, prevLevel);
       } else {
         nextProblem();
       }
@@ -721,17 +1141,34 @@ function handleAnswer(btn) {
   }
 }
 
-function showCelebration() {
+function showCelebration(didLevelUp, prevLevel) {
   showScreen(celebrationScreen);
   $('celeb-score').textContent = score;
   $('celeb-streak').textContent = `Best streak: ${bestStreak}`;
   $('celeb-total').textContent = `${score} out of ${totalProblems} correct`;
+
+  const celebLevel = $('celeb-level');
+  if (didLevelUp) {
+    const evo = getEvolution(monsterLevel);
+    celebLevel.textContent = `Level Up! You're now ${evo.name}!`;
+    celebLevel.style.display = '';
+    $('celeb-title').textContent = 'LEVEL UP!';
+  } else {
+    celebLevel.style.display = 'none';
+    $('celeb-title').textContent = 'Great Job!';
+  }
+
+  // Apply evolution to celebration monster
+  const cm = $('celeb-monster');
+  const evo = getEvolution(monsterLevel);
+  cm.style.background = evo.color;
+  cm.style.width = evo.size + 'px';
+  cm.style.height = evo.size + 'px';
+
   spawnConfetti();
 
-  // Re-trigger monster animation
-  const cm = $('celeb-monster');
   cm.className = 'monster';
-  void cm.offsetWidth; // force reflow
+  void cm.offsetWidth;
   cm.className = 'monster happy';
 }
 
@@ -742,7 +1179,12 @@ $('play-btn').addEventListener('click', () => {
   streak = 0;
   bestStreak = 0;
   totalProblems = 0;
+  monsterLevel = 1;
+  levelScore = 0;
+  retryQueue = [];
+  problemsSinceRetry = 0;
   updateUI();
+  applyMonsterEvolution(gameMonster, 1, false);
   showScreen(problemScreen);
   nextProblem();
 });
@@ -764,11 +1206,14 @@ document.addEventListener('touchend', e => {
   }
 }, { passive: false });
 
-// Make start monster bounce on load for fun
-setTimeout(() => {
-  $('start-monster').classList.add('happy');
-  setTimeout(() => $('start-monster').classList.remove('happy'), 1000);
-}, 500);
+// Start screen idle animation
+const startMonster = $('start-monster');
+startMonster.classList.add('idle');
+// Blink on start screen too
+setInterval(() => {
+  startMonster.classList.add('blink');
+  setTimeout(() => startMonster.classList.remove('blink'), 200);
+}, 2500);
 </script>
 
 </body>
