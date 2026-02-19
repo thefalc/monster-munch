@@ -766,7 +766,7 @@ function randInt(min, max) {
 }
 
 function generateProblem() {
-  const types = ['add1', 'add2', 'nearDouble', 'sub1', 'sub2'];
+  const types = ['add1', 'add2', 'double', 'nearDouble', 'sub1', 'sub2'];
   const type = types[randInt(0, types.length - 1)];
   let a, b, answer, text;
 
@@ -783,6 +783,13 @@ function generateProblem() {
       answer = a + b;
       text = `${a} + ${b} = ?`;
       break;
+    case 'double': {
+      a = randInt(1, 10);
+      b = a;
+      answer = a + b;
+      text = `${a} + ${b} = ?`;
+      break;
+    }
     case 'nearDouble': {
       const base = randInt(1, 9);
       if (Math.random() < 0.5) {
